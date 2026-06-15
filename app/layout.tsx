@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description:
     "Sarvam Cart is a premium curated e-commerce experience showcasing beautiful lifestyle, home decor, and fashion drops with seamless state tracking.",
   icons: {
-    icon: "/favicon.png",
+    icon: "/favicon.ico",
   },
 };
 
