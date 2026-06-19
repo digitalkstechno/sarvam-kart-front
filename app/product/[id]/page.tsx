@@ -64,10 +64,10 @@ export default function ProductDetailPage() {
           shopifyId: data.shopifyId,
           variants: data.variants,
           name: data.title,
-          price: data.basePrice || variant.price || 0,
+          price: data.price || data.basePrice || variant.price || 0,
           originalPrice:
-            variant.compareAtPrice > (data.basePrice || variant.price)
-              ? variant.compareAtPrice
+            data.compareAtPrice > (data.price || data.basePrice || variant.price)
+              ? data.compareAtPrice
               : null,
           currency: "INR",
           category: data.categories?.length
@@ -79,7 +79,11 @@ export default function ProductDetailPage() {
           thumbnails: thumbnails,
           rating: 4.8,
           descriptionHtml: data.description || "",
-          sku: variant.sku || "N/A",
+          sku: data.sku || variant.sku || "N/A",
+          dimension: data.dimension || "N/A",
+          weight: data.weight || "N/A",
+          hsCode: data.hsCode || "N/A",
+          stock: data.stock || 0,
         };
         setProduct(adapted);
 
@@ -455,8 +459,11 @@ export default function ProductDetailPage() {
             {/* SKU Info */}
             <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs border-t border-slate-100 pt-4">
               {[
-                // ["SKU", product.sku],
-                ["Available", "Instock"],
+                ["SKU", product.sku],
+                ["Stock", product.stock > 0 ? `${product.stock} In Stock` : "Out of Stock"],
+                ["Dimension", product.dimension],
+                ["Weight", product.weight],
+                ["HSN Code", product.hsCode],
                 ["Vendor", product.brand],
                 ["Collections", product.category],
               ].map(([k, v]) => (
