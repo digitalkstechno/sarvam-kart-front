@@ -212,9 +212,10 @@ export default function OrderDetailsPage() {
     const newItem = {
       productId: product._id,
       title: product.title,
-      price: product.basePrice || product.variants?.[0]?.price || product.price || 0,
+      price: product.resellerPrice > 0 ? product.resellerPrice : (product.basePrice || product.variants?.[0]?.price || product.price || 0),
       quantity: 1,
-      image: product.images?.[0]?.src || ""
+      image: product.images?.[0]?.src || "",
+      stock: product.stock || 0
     };
     setItems([...items, newItem]);
     setProductSearch("");
@@ -311,7 +312,7 @@ export default function OrderDetailsPage() {
                           <img src={p.images?.[0]?.src || ""} alt={p.title} className="w-10 h-10 rounded-lg object-cover border border-slate-100 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-slate-800 truncate">{p.title}</p>
-                            <p className="text-xs font-semibold text-[#00A759]">₹{p.basePrice || p.variants?.[0]?.price || p.price || 0}</p>
+                            <p className="text-xs font-semibold text-[#00A759]">₹{p.resellerPrice > 0 ? p.resellerPrice : (p.basePrice || p.variants?.[0]?.price || p.price || 0)}</p>
                           </div>
                           <button className="w-8 h-8 rounded-full bg-[#00A759]/10 text-[#00A759] flex items-center justify-center hover:bg-[#00A759] hover:text-white transition-colors">
                             <Plus className="w-4 h-4" />
@@ -345,6 +346,9 @@ export default function OrderDetailsPage() {
                             className="w-20 px-1 py-0.5 text-xs font-bold text-[#00A759] bg-slate-50 border border-slate-200 rounded outline-none focus:border-[#00A759]"
                           />
                         )}
+                        <span className="ml-2 text-xs font-medium text-slate-500">
+                          (Stock: <span className={item.stock > 0 ? "text-green-600 font-bold" : "text-red-600 font-bold"}>{item.stock || 0}</span>)
+                        </span>
                       </div>
                     </div>
                     

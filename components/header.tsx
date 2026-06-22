@@ -160,7 +160,7 @@ export default function Header() {
                           <p className="text-xs text-slate-500 truncate">{product.category}</p>
                         </div>
                         <div className="text-sm font-bold text-[#00A759]">
-                          ₹{product.price || product.variants?.[0]?.price || 0}
+                          ₹{((product.resellerPrice > 0 ? product.resellerPrice : (product.basePrice || product.price || product.variants?.[0]?.price)) || 0).toLocaleString()}
                         </div>
                       </Link>
                     ))}

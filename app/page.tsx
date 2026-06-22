@@ -351,7 +351,7 @@ function ProductCard({ product }: { product: any }) {
 
           <div className="flex justify-between items-center mt-2">
             <div className="font-bold text-slate-800">
-              ₹{(product.basePrice || 0).toLocaleString()}
+              ₹{((product.resellerPrice > 0 ? product.resellerPrice : (product.basePrice || product.price)) || 0).toLocaleString()}
             </div>
 
             <div className="z-10 mt-1 bg-[#00A759] hover:bg-[#00A759]/90 transition-all rounded-lg text-white text-xs font-semibold" onClick={(e) => e.preventDefault()}>

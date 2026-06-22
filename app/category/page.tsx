@@ -516,11 +516,7 @@ function CategoryContent() {
                           <div>
                             <span className="text-base font-black text-slate-900">
                               ₹
-                              {(
-                                product.basePrice ||
-                                product.price ||
-                                0
-                              ).toLocaleString()}
+                              {((product.resellerPrice > 0 ? product.resellerPrice : (product.basePrice || product.price)) || 0).toLocaleString()}
                             </span>
                           </div>
                           <div
@@ -592,11 +588,7 @@ function CategoryContent() {
                         <div className="text-right">
                           <p className="text-base font-black text-slate-900">
                             ₹
-                            {(
-                              product.basePrice ||
-                              product.price ||
-                              0
-                            ).toLocaleString()}
+                            {((product.resellerPrice > 0 ? product.resellerPrice : (product.basePrice || product.price)) || 0).toLocaleString()}
                           </p>
                         </div>
                         <div className="flex gap-2">

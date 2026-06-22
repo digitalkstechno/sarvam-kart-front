@@ -64,7 +64,7 @@ export default function ProductDetailPage() {
           shopifyId: data.shopifyId,
           variants: data.variants,
           name: data.title,
-          price: data.price || data.basePrice || variant.price || 0,
+          price: (data.resellerPrice > 0 ? data.resellerPrice : (data.basePrice || data.price || variant.price)) || 0,
           originalPrice:
             data.compareAtPrice > (data.price || data.basePrice || variant.price)
               ? data.compareAtPrice
@@ -522,11 +522,7 @@ export default function ProductDetailPage() {
                     </h4>
                     <span className="text-xs font-mono font-semibold text-slate-500">
                       ₹
-                      {(
-                        item.basePrice ||
-                        item.variants?.[0]?.price ||
-                        0
-                      ).toLocaleString()}
+                      {((item.resellerPrice > 0 ? item.resellerPrice : (item.basePrice || item.variants?.[0]?.price)) || 0).toLocaleString()}
                     </span>
                   </div>
                 </Link>

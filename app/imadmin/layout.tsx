@@ -111,6 +111,18 @@ export default function AdminLayout({
             <span className="font-medium text-sm">Orders</span>
           </Link>
 
+          <Link
+            href="/imadmin/products"
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+              pathname.includes("/imadmin/products")
+                ? "bg-[#00A759] text-white"
+                : "text-slate-400 hover:bg-slate-900 hover:text-white"
+            }`}
+          >
+            <LayoutDashboard className="w-5 h-5" />
+            <span className="font-medium text-sm">Products</span>
+          </Link>
+
 
           {(userRole === 'admin' || userRole === 'superadmin') && (
             <Link

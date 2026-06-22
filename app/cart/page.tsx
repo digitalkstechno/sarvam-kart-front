@@ -348,7 +348,7 @@ export default function CartPage() {
                             </h4>
                           </Link>
                           <span className="text-sm font-mono font-bold text-slate-800 mt-1 block">
-                            ₹{(product.basePrice || product.price || 0).toLocaleString()}
+                            ₹{((product.resellerPrice > 0 ? product.resellerPrice : (product.basePrice || product.price)) || 0).toLocaleString()}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
