@@ -5,6 +5,7 @@ interface User {
   _id: string;
   fullName?: string;
   phone: string;
+  email?: string;
   role: string;
   status: string;
 }
@@ -15,7 +16,6 @@ interface AuthState {
   adminToken: string | null;
   loading: boolean;
   error: string | null;
-  isNewUser: boolean;
 }
 
 const initialState: AuthState = {
@@ -24,62 +24,37 @@ const initialState: AuthState = {
   adminToken: typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null,
   loading: false,
   error: null,
-  isNewUser: false,
 };
 
-export const requestOtp = createAsyncThunk(
-  'auth/requestOtp',
-  async ({ phone, isAdminLogin = false }: { phone: string, isAdminLogin?: boolean }, { rejectWithValue }) => {
+export const registerUser = createAsyncThunk(
+  'auth/registerUser',
+  async (userData: any, { rejectWithValue }) => {
     try {
-      const response = await api.post('/user/request-otp', { phone, isAdminLogin });
+      const response = await api.post('/user/register', userData);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to request OTP');
+      return rejectWithValue(error.response?.data?.message || 'Failed to register');
     }
   }
 );
 
-export const verifyOtp = createAsyncThunk(
-  'auth/verifyOtp',
-  async ({ phone, otp, isAdminLogin = false }: { phone: string, otp: string, isAdminLogin?: boolean }, { rejectWithValue }) => {
+export const loginUser = createAsyncThunk(
+  'auth/loginUser',
+  async (credentials: any, { rejectWithValue }) => {
     try {
-      const response = await api.post('/user/verify-otp', { phone, otp });
-      const { data: user, token, isNewUser } = response.data;
-      
-      if (isAdminLogin) {
-        if (user.role !== 'admin' && user.role !== 'staff' && user.role !== 'superadmin') {
-          return rejectWithValue('Unauthorized: Admin or Staff access required');
-        }
-      } else {
-        if (user.role === 'admin' || user.role === 'staff' || user.role === 'superadmin') {
-          return rejectWithValue('Unauthorized: Admins and Staff cannot login to the customer panel');
-        }
-      }
-      
-      return { user, token, isNewUser, isAdminLogin };
+      const response = await api.post('/user/login', credentials);
+      return { ...response.data, isAdminLogin: credentials.isAdminLogin };
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to verify OTP');
-    }
-  }
-);
-
-export const addReseller = createAsyncThunk(
-  'auth/addReseller',
-  async ({ name, number, address }: { name: string, number: string, address: string }, { rejectWithValue }) => {
-    try {
-      const response = await api.post('/reseller', { name, number, address });
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to add reseller');
+      return rejectWithValue(error.response?.data?.message || 'Failed to login');
     }
   }
 );
 
 export const updateUserProfile = createAsyncThunk(
   'auth/updateUserProfile',
-  async ({ id, fullName, phone, otp }: { id: string, fullName?: string, phone?: string, otp?: string }, { rejectWithValue }) => {
+  async ({ id, fullName, phone, email, address, password }: any, { rejectWithValue }) => {
     try {
-      const response = await api.put(`/user/${id}`, { fullName, phone, otp });
+      const response = await api.put(`/user/${id}`, { fullName, phone, email, address, password });
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to update profile');
@@ -114,34 +89,35 @@ const authSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
-    },
-    setNewUserFlag: (state, action) => {
-      state.isNewUser = action.payload;
     }
   },
   extraReducers: (builder) => {
     builder
-      // Request OTP
-      .addCase(requestOtp.pending, (state) => {
+      // Register
+      .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(requestOtp.fulfilled, (state) => {
+      .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
+        state.user = action.payload.data;
+        state.token = action.payload.token;
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('token', action.payload.token);
+        }
       })
-      .addCase(requestOtp.rejected, (state, action) => {
+      .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Verify OTP
-      .addCase(verifyOtp.pending, (state) => {
+      // Login
+      .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(verifyOtp.fulfilled, (state, action) => {
+      .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.isNewUser = action.payload.isNewUser;
-        state.user = action.payload.user;
+        state.user = action.payload.data;
         
         if (action.payload.isAdminLogin) {
           state.adminToken = action.payload.token;
@@ -149,35 +125,13 @@ const authSlice = createSlice({
             localStorage.setItem('admin_token', action.payload.token);
           }
         } else {
-          // If it's a new user, we don't save the token just yet until profile is completed
-          if (!action.payload.isNewUser) {
-            state.token = action.payload.token;
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('token', action.payload.token);
-            }
-          } else {
-            // Keep token in state temporarily for new users so we can use it to create reseller
-            state.token = action.payload.token;
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('token', action.payload.token);
-            }
+          state.token = action.payload.token;
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('token', action.payload.token);
           }
         }
       })
-      .addCase(verifyOtp.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      // Add Reseller
-      .addCase(addReseller.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(addReseller.fulfilled, (state) => {
-        state.loading = false;
-        state.isNewUser = false; // Profile completed
-      })
-      .addCase(addReseller.rejected, (state, action) => {
+      .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
@@ -213,5 +167,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, adminLogout, clearError, setNewUserFlag } = authSlice.actions;
+export const { logout, adminLogout, clearError } = authSlice.actions;
 export default authSlice.reducer;

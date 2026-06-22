@@ -8,6 +8,7 @@ interface Staff {
   _id: string;
   fullName: string;
   phone: string;
+  email?: string;
   role: string;
   status: string;
 }
@@ -22,9 +23,9 @@ export default function StaffPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [originalPhone, setOriginalPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  
   const [adding, setAdding] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -50,9 +51,8 @@ export default function StaffPage() {
     setEditingId(null);
     setFullName("");
     setPhone("");
-    setOriginalPhone("");
-    setShowOtpInput(false);
-    setOtp("");
+    setEmail("");
+    setPassword("");
     setMessage({ text: "", type: "" });
     setIsModalOpen(true);
   };
@@ -60,10 +60,9 @@ export default function StaffPage() {
   const openEditModal = (staff: Staff) => {
     setEditingId(staff._id);
     setFullName(staff.fullName || "");
-    setPhone(staff.phone);
-    setOriginalPhone(staff.phone);
-    setShowOtpInput(false);
-    setOtp("");
+    setPhone(staff.phone || "");
+    setEmail(staff.email || "");
+    setPassword("");
     setMessage({ text: "", type: "" });
     setIsModalOpen(true);
   };
@@ -76,8 +75,8 @@ export default function StaffPage() {
 
   const handleSaveStaff = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !phone) {
-      setMessage({ text: "Please provide both name and phone number.", type: "error" });
+    if (!fullName || !phone || (!editingId && !email) || (!editingId && !password)) {
+      setMessage({ text: "Please provide name, phone, email, and password.", type: "error" });
       return;
     }
     
@@ -87,33 +86,20 @@ export default function StaffPage() {
     try {
       if (editingId) {
         // Edit mode
-        if (phone !== originalPhone) {
-          if (!showOtpInput) {
-            // Request OTP
-            await api.post("/user/request-otp", { phone });
-            setShowOtpInput(true);
-            setMessage({ text: "OTP sent to new phone number. Please verify.", type: "success" });
-            setAdding(false);
-            return;
-          } else {
-            // Verify and Update
-            if (!otp || otp.length < 4) {
-              setMessage({ text: "Please enter a valid OTP.", type: "error" });
-              setAdding(false);
-              return;
-            }
-            await api.put(`/user/${editingId}`, { fullName, phone, otp });
-          }
-        } else {
-          // Update without changing phone
-          await api.put(`/user/${editingId}`, { fullName });
-        }
+        await api.put(`/user/${editingId}`, { 
+          fullName, 
+          phone, 
+          email, 
+          ...(password ? { password } : {})
+        });
         setMessage({ text: "Staff updated successfully!", type: "success" });
       } else {
         // Add mode
         await api.post("/user/add-staff", {
           fullName,
           phone,
+          email,
+          password,
           role: "staff"
         });
         setMessage({ text: "Staff added successfully!", type: "success" });
@@ -129,9 +115,7 @@ export default function StaffPage() {
         type: "error"
       });
     } finally {
-      if (!showOtpInput || message.type === 'success') {
-        setAdding(false);
-      }
+      setAdding(false);
     }
   };
 
@@ -186,6 +170,7 @@ export default function StaffPage() {
               <thead className="bg-slate-50/80 border-b border-slate-100 text-slate-700">
                 <tr>
                   <th className="px-6 py-4 font-semibold rounded-tl-xl">Name</th>
+                  <th className="px-6 py-4 font-semibold">Email</th>
                   <th className="px-6 py-4 font-semibold">Phone</th>
                   <th className="px-6 py-4 font-semibold">Status</th>
                   <th className="px-6 py-4 font-semibold">Role</th>
@@ -201,6 +186,7 @@ export default function StaffPage() {
                       </div>
                       {staff.fullName || "N/A"}
                     </td>
+                    <td className="px-6 py-4">{staff.email || "N/A"}</td>
                     <td className="px-6 py-4">{staff.phone}</td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${
@@ -277,7 +263,7 @@ export default function StaffPage() {
               </button>
             </div>
             
-            <form onSubmit={handleSaveStaff} className="p-6 space-y-5">
+            <form onSubmit={handleSaveStaff} className="p-6 space-y-4">
               {message.text && (
                 <div className={`p-4 rounded-xl text-sm font-medium flex items-center gap-2 ${message.type === 'error' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}>
                   {message.text}
@@ -292,7 +278,6 @@ export default function StaffPage() {
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  disabled={showOtpInput}
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#00A759]/20 focus:border-[#00A759] transition-all disabled:opacity-50"
                   placeholder="e.g. Rahul Sharma"
                 />
@@ -305,28 +290,38 @@ export default function StaffPage() {
                 <input
                   type="tel"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  disabled={showOtpInput}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                  maxLength={10}
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#00A759]/20 focus:border-[#00A759] transition-all disabled:opacity-50"
                   placeholder="e.g. 9876543210"
                 />
               </div>
 
-              {showOtpInput && (
-                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Enter OTP
-                  </label>
-                  <input
-                    type="text"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#00A759]/20 focus:border-[#00A759] transition-all"
-                    placeholder="Enter 6-digit OTP"
-                    maxLength={6}
-                  />
-                </div>
-              )}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#00A759]/20 focus:border-[#00A759] transition-all disabled:opacity-50"
+                  placeholder="e.g. rahul@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Password {editingId && <span className="text-slate-400 font-normal text-xs">(leave blank to keep unchanged)</span>}
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#00A759]/20 focus:border-[#00A759] transition-all disabled:opacity-50"
+                  placeholder="••••••••"
+                />
+              </div>
 
               <div className="pt-4 flex gap-3">
                 <button
@@ -345,9 +340,9 @@ export default function StaffPage() {
                   {adding ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      {showOtpInput ? "Verifying..." : "Saving..."}
+                      Saving...
                     </>
-                  ) : showOtpInput ? "Verify & Save" : editingId ? "Update Staff" : "Save Staff"}
+                  ) : editingId ? "Update Staff" : "Save Staff"}
                 </button>
               </div>
             </form>
