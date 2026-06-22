@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { api } from "@/lib/axios";
-import { Plus, X, User, Trash2, Edit } from "lucide-react";
+import { Plus, X, User, Trash2, Edit, Eye, EyeOff } from "lucide-react";
 
 interface Staff {
   _id: string;
@@ -25,6 +25,7 @@ export default function StaffPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   
   const [adding, setAdding] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
@@ -314,13 +315,26 @@ export default function StaffPage() {
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Password {editingId && <span className="text-slate-400 font-normal text-xs">(leave blank to keep unchanged)</span>}
                 </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#00A759]/20 focus:border-[#00A759] transition-all disabled:opacity-50"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#00A759]/20 focus:border-[#00A759] transition-all disabled:opacity-50 pr-10"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div className="pt-4 flex gap-3">
