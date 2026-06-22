@@ -12,7 +12,7 @@ const EditProductPriceModal = ({ isOpen, onClose, product, onSave }: { isOpen: b
 
   useEffect(() => {
     if (product) {
-      setResellerPrice(product.resellerPrice ? product.resellerPrice.toString() : "");
+      setResellerPrice(!product.isResellerPriceDefault && product.resellerPrice > 0 ? product.resellerPrice.toString() : "");
     }
   }, [product]);
 
@@ -249,10 +249,10 @@ export default function AdminProductsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className={`font-medium ${product.resellerPrice > 0 ? 'text-[#00A759]' : 'text-slate-900'}`}>
-                          ₹{product.resellerPrice > 0 ? product.resellerPrice : (product.basePrice || product.price || 0)}
+                        <span className={`font-medium ${!product.isResellerPriceDefault ? 'text-[#00A759]' : 'text-slate-900'}`}>
+                          ₹{product.resellerPrice}
                         </span>
-                        {product.resellerPrice > 0 ? (
+                        {!product.isResellerPriceDefault ? (
                           <span className="text-xs text-green-600 bg-green-50 px-2 rounded w-max mt-1">Custom Set</span>
                         ) : (
                           <span className="text-xs text-slate-400 w-max mt-1">Default Base Price</span>
