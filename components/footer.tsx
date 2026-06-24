@@ -100,6 +100,7 @@ export default function Footer() {
               {[
                 { label: "Privacy Policy", href: "/privacy-policy" },
                 { label: "Terms & Conditions", href: "/terms-conditions" },
+                { label: "Shipping Policies", href: "/shipping-policy" },
               ].map(({ label, href }) => (
                 <li key={label}>
                   <Link href={href} className="text-xs text-slate-600 hover:text-[#00A759] transition">
