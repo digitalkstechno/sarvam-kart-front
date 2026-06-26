@@ -131,7 +131,23 @@ const authSlice = createSlice({
           }
         }
       })
-      .addCase(loginUser.rejected, (state, action) => {
+      .addCase(verifyOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Add Reseller
+      .addCase(addReseller.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addReseller.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isNewUser = false; // Profile completed
+        if (state.user) {
+          state.user.fullName = action.meta.arg.name;
+        }
+      })
+      .addCase(addReseller.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
