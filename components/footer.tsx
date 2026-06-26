@@ -26,7 +26,7 @@ export default function Footer() {
         <div>
           <Link href="/" className="inline-flex items-center no-underline">
             <img
-              src="/Images/logo.png"
+              src="/images/logo.png"
               alt="Sarvam Cart"
               className="h-10 object-contain drop-shadow-sm"
             />
