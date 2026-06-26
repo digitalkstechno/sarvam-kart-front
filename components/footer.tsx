@@ -136,6 +136,23 @@ export default function Footer() {
                 </span>
               </li>
             </ul>
+
+            <div className="pt-2">
+              <a
+                href="https://play.google.com/store/apps/details?id=com.sarvam.cart"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 bg-white hover:bg-[#02A759]/5 text-[#02A759] px-3.5 py-1.5 rounded-lg transition-colors border border-[#02A759]"
+              >
+                <svg viewBox="0 0 512 512" className="w-4.5 h-4.5 fill-[#02A759] shrink-0">
+                  <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58-33.2-65.6 65.6 65.6 65.6 58-33.2c15-8.6 25-24.8 25-42.4s-10-33.8-25-42.4zM325.3 277.7l60.1 60.1L104.6 499l220.7-221.3z"/>
+                </svg>
+                <div className="flex flex-col text-left leading-tight">
+                  <span className="text-[8px] uppercase tracking-wider text-[#02A759]/80">Get it on</span>
+                  <span className="text-[13px] font-semibold text-[#02A759]">Google Play</span>
+                </div>
+              </a>
+            </div>
           </div>
 
         </div>
