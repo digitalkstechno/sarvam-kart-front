@@ -173,9 +173,12 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(addReseller.fulfilled, (state) => {
+      .addCase(addReseller.fulfilled, (state, action) => {
         state.loading = false;
         state.isNewUser = false; // Profile completed
+        if (state.user) {
+          state.user.fullName = action.meta.arg.name;
+        }
       })
       .addCase(addReseller.rejected, (state, action) => {
         state.loading = false;
