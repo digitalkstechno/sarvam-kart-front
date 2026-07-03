@@ -21,18 +21,18 @@ export default function Footer() {
         {/* Single Row: Contact | Links | Policies | Social + Newsletter */}
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
 
-           {/* Social + Newsletter */}
+          {/* Social + Newsletter */}
           <div className="flex-1 space-y-6">
-        <div>
-          <Link href="/" className="inline-flex items-center no-underline">
-            <img
-              src="/images/logo.png"
-              alt="Sarvam Cart"
-              className="h-10 object-contain drop-shadow-sm"
-            />
-          </Link>
-          <p className="text-xs text-slate-500 mt-1">Digital Dream, E Commerce Reality</p>
-        </div>
+            <div>
+              <Link href="/" className="inline-flex items-center no-underline">
+                <img
+                  src="/images/logo.png"
+                  alt="Sarvam Cart"
+                  className="h-10 object-contain drop-shadow-sm"
+                />
+              </Link>
+              <p className="text-xs text-slate-500 mt-1">Digital Dream, E Commerce Reality</p>
+            </div>
             {/* Social */}
             <div className="space-y-3">
               <h6 className="text-xs font-bold uppercase tracking-widest text-[#00A759]">Follow Us</h6>
@@ -57,7 +57,7 @@ export default function Footer() {
 
             {/* Newsletter */}
             <div className="space-y-3">
-             
+
               <div className="flex gap-2 max-w-sm">
                 <input
                   type="email"
@@ -71,7 +71,7 @@ export default function Footer() {
             </div>
           </div>
 
-        
+
 
           {/* Quick Links */}
           <div className="min-w-[140px] space-y-3">
@@ -111,7 +111,7 @@ export default function Footer() {
             </ul>
           </div>
 
-           {/* Contact */}
+          {/* Contact */}
           <div className="min-w-[350px] space-y-3">
             <h6 className="text-xs font-bold uppercase tracking-widest text-[#00A759]">Contact Us</h6>
             <ul className="space-y-2.5">
@@ -137,7 +137,7 @@ export default function Footer() {
               </li>
             </ul>
 
-            <div className="pt-2">
+            <div className="pt-2 flex gap-4">
               <a
                 href="https://play.google.com/store/apps/details?id=com.sarvam.cart"
                 target="_blank"
@@ -145,11 +145,26 @@ export default function Footer() {
                 className="inline-flex items-center gap-3 bg-white hover:bg-[#02A759]/5 text-[#02A759] px-3.5 py-1.5 rounded-lg transition-colors border border-[#02A759]"
               >
                 <svg viewBox="0 0 512 512" className="w-4.5 h-4.5 fill-[#02A759] shrink-0">
-                  <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58-33.2-65.6 65.6 65.6 65.6 58-33.2c15-8.6 25-24.8 25-42.4s-10-33.8-25-42.4zM325.3 277.7l60.1 60.1L104.6 499l220.7-221.3z"/>
+                  <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58-33.2-65.6 65.6 65.6 65.6 58-33.2c15-8.6 25-24.8 25-42.4s-10-33.8-25-42.4zM325.3 277.7l60.1 60.1L104.6 499l220.7-221.3z" />
                 </svg>
                 <div className="flex flex-col text-left leading-tight">
                   <span className="text-[8px] uppercase tracking-wider text-[#02A759]/80">Get it on</span>
                   <span className="text-[13px] font-semibold text-[#02A759]">Google Play</span>
+                </div>
+              </a>
+
+              <a
+                href="https://apps.apple.com/us/app/sarvam-cart/id6783207518"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 bg-white hover:bg-[#02A759]/5 text-[#02A759] px-3.5 py-1.5 rounded-lg transition-colors border border-[#02A759]"
+              >
+                <svg viewBox="0 0 640 640" role="img" aria-hidden="true" className="w-6 h-6 fill-[#02A759] shrink-0">
+                  <path d="M447.1 332.7c-.2-36.7 16.4-64.4 50-84.8c-18.8-26.9-47.2-41.7-84.7-44.6c-35.5-2.8-74.3 20.7-88.5 20.7c-15 0-49.4-19.7-76.4-19.7c-55.8.9-115.1 44.5-115.1 133.2c0 26.2 4.8 53.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2c25.2-.6 43-17.9 75.8-17.9c31.8 0 48.3 17.9 76.4 17.9c48.6-.7 90.4-82.5 102.6-119.3c-65.2-30.7-61.7-90-61.7-91.9m-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5c-24.1 1.4-52 16.4-67.9 34.9c-17.5 19.8-27.8 44.3-25.6 71.9c26.1 2 49.9-11.4 69.5-34.3" />
+                </svg>
+                <div className="flex flex-col text-left leading-tight">
+                  <span className="text-[8px] uppercase tracking-wider text-[#02A759]/80">Get it on</span>
+                  <span className="text-[13px] font-semibold text-[#02A759]">App Store</span>
                 </div>
               </a>
             </div>
@@ -160,12 +175,23 @@ export default function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-center sm:justify-end">
-          <span className="text-[13px] text-slate-500">
-            © 2026 SarvamcartStore. All Rights Reserved.
-          </span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex flex-col gap-1 text-center sm:text-left">
+              <span className="text-[13px] text-slate-600 font-medium">
+                An ISO 9001 : 2015 CERTIFIED COMPANY &nbsp;|&nbsp; Certificate No: 305026062924Q
+              </span>
+            </div>
+            <div className="shrink-0">
+              <img
+                src="/images/ISO_mark.jpeg"
+                alt="ISO Certified Logo"
+                className="h-15 w-auto object-contain"
+              />
+            </div>
+          </div>
         </div>
       </div>
-    </footer>
+    </footer> 
   );
 }
