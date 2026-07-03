@@ -41,7 +41,7 @@ export default function ProductDetailPage() {
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(50);
   const [selectedThumbIndex, setSelectedThumbIndex] = useState<number>(-1);
   const [activeTab, setActiveTab] = useState<
     "description" | "specifications" | "shipping"
@@ -161,11 +161,11 @@ export default function ProductDetailPage() {
   const handleUpdateQuantity = async (delta: number) => {
     if (!cartItem) return;
     const newQty = cartItem.quantity + delta;
-    if (newQty <= 0) {
+    if (newQty <= 0 || (newQty < 50 && delta < 0)) {
       await dispatch(removeFromCartAsync(cartItem._id));
     } else {
       await dispatch(
-        updateQuantityAsync({ cartItemId: cartItem._id, quantity: newQty }),
+        updateQuantityAsync({ cartItemId: cartItem._id, quantity: newQty < 50 ? 50 : newQty }),
       );
     }
   };
@@ -370,14 +370,24 @@ export default function ProductDetailPage() {
                   <>
                     <div className="flex items-center border border-slate-200 rounded-xl p-1 bg-slate-50">
                       <button
-                        onClick={() => setQuantity((q) => (q > 1 ? q - 1 : 1))}
+                        onClick={() => setQuantity((q) => (q > 50 ? q - 1 : 50))}
                         className="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-white rounded-lg transition"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
-                      <span className="w-8 font-mono font-bold text-center text-xs text-slate-900">
-                        {quantity}
-                      </span>
+                      <input
+                        type="number"
+                        min="50"
+                        value={quantity}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          if (!isNaN(val)) setQuantity(val);
+                        }}
+                        onBlur={() => {
+                          if (quantity < 50) setQuantity(50);
+                        }}
+                        className="w-12 text-center font-mono font-bold text-xs text-slate-900 bg-transparent focus:outline-none"
+                      />
                       <button
                         onClick={() => setQuantity((q) => q + 1)}
                         className="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-white rounded-lg transition"
@@ -415,9 +425,19 @@ export default function ProductDetailPage() {
                       <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
                         In Bag
                       </span>
-                      <span className="font-mono font-bold text-xl text-slate-900">
-                        {cartItem.quantity}
-                      </span>
+                      <input
+                        type="number"
+                        min="50"
+                        value={cartItem.quantity}
+                        onChange={async (e) => {
+                          const val = parseInt(e.target.value);
+                          if (!isNaN(val)) {
+                            if (val === 0) await dispatch(removeFromCartAsync(cartItem._id));
+                            else await dispatch(updateQuantityAsync({ cartItemId: cartItem._id, quantity: val }));
+                          }
+                        }}
+                        className="w-16 font-mono font-bold text-xl text-center text-slate-900 bg-transparent focus:outline-none"
+                      />
                     </div>
                     <button
                       onClick={() => handleUpdateQuantity(1)}

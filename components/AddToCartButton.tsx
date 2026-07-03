@@ -41,7 +41,7 @@ export default function AddToCartButton({ product, variantId, className = "", is
     const payload = {
       productId: product._id || product.shopifyId, // Try Mongo ID first
       variantId: variantId || product.variants?.[0]?.shopifyVariantId || product.variants?.[0]?._id,
-      quantity: 1
+      quantity: 50 // Minimum quantity is 50
     };
 
     if (!payload.productId) {
@@ -73,8 +73,22 @@ export default function AddToCartButton({ product, variantId, className = "", is
     const newQty = cartItem.quantity + delta;
     if (newQty <= 0) {
       await dispatch(removeFromCartAsync(cartItem._id));
+    } else if (newQty < 50 && delta < 0) {
+      // If they try to go below 50 using minus, just remove it or set to 0
+      await dispatch(removeFromCartAsync(cartItem._id));
     } else {
-      await dispatch(updateQuantityAsync({ cartItemId: cartItem._id, quantity: newQty }));
+      await dispatch(updateQuantityAsync({ cartItemId: cartItem._id, quantity: newQty < 50 ? 50 : newQty }));
+    }
+  };
+
+  const handleManualQuantityChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value);
+    if (!isNaN(val)) {
+      if (val === 0) {
+        await dispatch(removeFromCartAsync(cartItem._id));
+      } else {
+        await dispatch(updateQuantityAsync({ cartItemId: cartItem._id, quantity: val }));
+      }
     }
   };
 
@@ -86,16 +100,20 @@ export default function AddToCartButton({ product, variantId, className = "", is
       >
         <button
           onClick={(e) => handleUpdateQuantity(e, -1)}
-          className="w-10 h-10 flex items-center justify-center text-[#00A759] hover:bg-emerald-50 transition"
+          className="w-10 h-10 flex items-center justify-center text-[#00A759] hover:bg-emerald-50 transition shrink-0"
         >
           <Minus className="w-4 h-4" />
         </button>
-        <span className="flex-1 text-center font-bold text-sm text-slate-800 font-mono">
-          {cartItem.quantity}
-        </span>
+        <input
+          type="number"
+          min="50"
+          value={cartItem.quantity}
+          onChange={handleManualQuantityChange}
+          className="flex-1 w-12 text-center font-bold text-sm text-slate-800 font-mono focus:outline-none focus:ring-1 focus:ring-[#00A759] bg-transparent"
+        />
         <button
           onClick={(e) => handleUpdateQuantity(e, 1)}
-          className="w-10 h-10 flex items-center justify-center text-[#00A759] hover:bg-emerald-50 transition"
+          className="w-10 h-10 flex items-center justify-center text-[#00A759] hover:bg-emerald-50 transition shrink-0"
         >
           <Plus className="w-4 h-4" />
         </button>

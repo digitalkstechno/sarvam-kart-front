@@ -186,22 +186,35 @@ export default function CartPage() {
                       <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 p-0.5">
                         <button
                           onClick={() => {
-                            if (item.quantity - 1 <= 0) {
+                            if (item.quantity - 1 < 50) {
                               dispatch(removeFromCartAsync(item._id));
                             } else {
                               dispatch(updateQuantityAsync({ cartItemId: item._id, quantity: item.quantity - 1 }));
                             }
                           }}
-                          className="w-8 h-8 flex items-center justify-center text-slate-500 hover:bg-white rounded-lg transition"
+                          className="w-8 h-8 flex items-center justify-center text-slate-500 hover:bg-white rounded-lg transition shrink-0"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
-                        <span className="w-6 text-center font-mono text-xs font-bold text-slate-900">
-                          {item.quantity}
-                        </span>
+                        <input
+                          type="number"
+                          min="50"
+                          value={item.quantity}
+                          onChange={async (e) => {
+                            const val = parseInt(e.target.value);
+                            if (!isNaN(val)) {
+                              if (val === 0) {
+                                await dispatch(removeFromCartAsync(item._id));
+                              } else {
+                                await dispatch(updateQuantityAsync({ cartItemId: item._id, quantity: val }));
+                              }
+                            }
+                          }}
+                          className="w-10 text-center font-mono text-xs font-bold text-slate-900 bg-transparent focus:outline-none"
+                        />
                         <button
                           onClick={() => dispatch(updateQuantityAsync({ cartItemId: item._id, quantity: item.quantity + 1 }))}
-                          className="w-8 h-8 flex items-center justify-center text-slate-500 hover:bg-white rounded-lg transition"
+                          className="w-8 h-8 flex items-center justify-center text-slate-500 hover:bg-white rounded-lg transition shrink-0"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
@@ -358,7 +371,7 @@ export default function CartPage() {
                               dispatch(addToCartAsync({ 
                                 productId: product._id || product.id, 
                                 variantId: product.variants?.[0]?.shopifyVariantId || product.variants?.[0]?._id || "default", 
-                                quantity: 1 
+                                quantity: 50 
                               }));
                               dispatch(toggleWishlist(product));
                             }}
