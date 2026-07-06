@@ -41,7 +41,7 @@ export default function ProductDetailPage() {
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [quantity, setQuantity] = useState(50);
+  const [quantity, setQuantity] = useState<number | string>(1); // setQuantity(50);
   const [selectedThumbIndex, setSelectedThumbIndex] = useState<number>(-1);
   const [activeTab, setActiveTab] = useState<
     "description" | "specifications" | "shipping"
@@ -161,11 +161,12 @@ export default function ProductDetailPage() {
   const handleUpdateQuantity = async (delta: number) => {
     if (!cartItem) return;
     const newQty = cartItem.quantity + delta;
-    if (newQty <= 0 || (newQty < 50 && delta < 0)) {
+    if (newQty <= 0 /* || (newQty < 50 && delta < 0) */) {
       await dispatch(removeFromCartAsync(cartItem._id));
     } else {
       await dispatch(
-        updateQuantityAsync({ cartItemId: cartItem._id, quantity: newQty < 50 ? 50 : newQty }),
+        // updateQuantityAsync({ cartItemId: cartItem._id, quantity: newQty < 50 ? 50 : newQty }),
+        updateQuantityAsync({ cartItemId: cartItem._id, quantity: newQty }),
       );
     }
   };
@@ -370,26 +371,37 @@ export default function ProductDetailPage() {
                   <>
                     <div className="flex items-center border border-slate-200 rounded-xl p-1 bg-slate-50">
                       <button
-                        onClick={() => setQuantity((q) => (q > 50 ? q - 1 : 50))}
+                        onClick={() => setQuantity((q) => {
+                          const val = typeof q === 'string' ? parseInt(q) || 1 : q;
+                          return val > 1 ? val - 1 : 1;
+                        })} // q > 50 ? q - 1 : 50
                         className="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-white rounded-lg transition"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
                       <input
                         type="number"
-                        min="50"
+                        min="1" // min="50"
                         value={quantity}
                         onChange={(e) => {
-                          const val = parseInt(e.target.value);
-                          if (!isNaN(val)) setQuantity(val);
+                          const raw = e.target.value;
+                          if (raw === "") {
+                            setQuantity("");
+                          } else {
+                            const val = parseInt(raw);
+                            if (!isNaN(val)) setQuantity(val);
+                          }
                         }}
                         onBlur={() => {
-                          if (quantity < 50) setQuantity(50);
+                          if (quantity === "" || (typeof quantity === 'number' && quantity < 1)) setQuantity(1); // if (quantity < 50) setQuantity(50);
                         }}
                         className="w-12 text-center font-mono font-bold text-xs text-slate-900 bg-transparent focus:outline-none"
                       />
                       <button
-                        onClick={() => setQuantity((q) => q + 1)}
+                        onClick={() => setQuantity((q) => {
+                          const val = typeof q === 'string' ? parseInt(q) || 0 : q;
+                          return val + 1;
+                        })}
                         className="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-white rounded-lg transition"
                       >
                         <Plus className="w-3.5 h-3.5" />

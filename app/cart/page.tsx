@@ -37,6 +37,7 @@ export default function CartPage() {
 
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [activeTab, setActiveTab] = useState<"bag" | "wishlist">("bag");
+  const [inputValues, setInputValues] = useState<Record<string, string>>({});
 
   const handleCheckout = async () => {
     if (cart.length === 0) {
@@ -186,10 +187,16 @@ export default function CartPage() {
                       <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 p-0.5">
                         <button
                           onClick={() => {
-                            if (item.quantity - 1 < 50) {
+                            let baseQty = item.quantity;
+                            if (inputValues[item._id] !== undefined) {
+                              const parsed = parseInt(inputValues[item._id]);
+                              if (!isNaN(parsed)) baseQty = parsed;
+                              setInputValues(prev => { const next = {...prev}; delete next[item._id]; return next; });
+                            }
+                            if (baseQty - 1 < 1) { // < 50
                               dispatch(removeFromCartAsync(item._id));
                             } else {
-                              dispatch(updateQuantityAsync({ cartItemId: item._id, quantity: item.quantity - 1 }));
+                              dispatch(updateQuantityAsync({ cartItemId: item._id, quantity: baseQty - 1 }));
                             }
                           }}
                           className="w-8 h-8 flex items-center justify-center text-slate-500 hover:bg-white rounded-lg transition shrink-0"
@@ -198,22 +205,49 @@ export default function CartPage() {
                         </button>
                         <input
                           type="number"
-                          min="50"
-                          value={item.quantity}
-                          onChange={async (e) => {
-                            const val = parseInt(e.target.value);
-                            if (!isNaN(val)) {
-                              if (val === 0) {
-                                await dispatch(removeFromCartAsync(item._id));
-                              } else {
-                                await dispatch(updateQuantityAsync({ cartItemId: item._id, quantity: val }));
+                          min="1" // min="50"
+                          value={inputValues[item._id] !== undefined ? inputValues[item._id] : item.quantity}
+                          onChange={(e) => {
+                            const rawVal = e.target.value;
+                            setInputValues(prev => ({ ...prev, [item._id]: rawVal }));
+                          }}
+                          onBlur={async () => {
+                            const rawVal = inputValues[item._id];
+                            if (rawVal !== undefined) {
+                              const val = parseInt(rawVal);
+                              if (!isNaN(val)) {
+                                if (val === 0) await dispatch(removeFromCartAsync(item._id));
+                                else if (val !== item.quantity) await dispatch(updateQuantityAsync({ cartItemId: item._id, quantity: val }));
+                              }
+                              setInputValues(prev => { const next = { ...prev }; delete next[item._id]; return next; });
+                            }
+                          }}
+                          onKeyDown={async (e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              const rawVal = inputValues[item._id];
+                              if (rawVal !== undefined) {
+                                const val = parseInt(rawVal);
+                                if (!isNaN(val)) {
+                                  if (val === 0) await dispatch(removeFromCartAsync(item._id));
+                                  else if (val !== item.quantity) await dispatch(updateQuantityAsync({ cartItemId: item._id, quantity: val }));
+                                }
+                                setInputValues(prev => { const next = { ...prev }; delete next[item._id]; return next; });
                               }
                             }
                           }}
                           className="w-10 text-center font-mono text-xs font-bold text-slate-900 bg-transparent focus:outline-none"
                         />
                         <button
-                          onClick={() => dispatch(updateQuantityAsync({ cartItemId: item._id, quantity: item.quantity + 1 }))}
+                          onClick={() => {
+                            let baseQty = item.quantity;
+                            if (inputValues[item._id] !== undefined) {
+                              const parsed = parseInt(inputValues[item._id]);
+                              if (!isNaN(parsed)) baseQty = parsed;
+                              setInputValues(prev => { const next = {...prev}; delete next[item._id]; return next; });
+                            }
+                            dispatch(updateQuantityAsync({ cartItemId: item._id, quantity: baseQty + 1 }));
+                          }}
                           className="w-8 h-8 flex items-center justify-center text-slate-500 hover:bg-white rounded-lg transition shrink-0"
                         >
                           <Plus className="w-3 h-3" />
@@ -371,7 +405,7 @@ export default function CartPage() {
                               dispatch(addToCartAsync({ 
                                 productId: product._id || product.id, 
                                 variantId: product.variants?.[0]?.shopifyVariantId || product.variants?.[0]?._id || "default", 
-                                quantity: 50 
+                                quantity: 1 // quantity: 50 
                               }));
                               dispatch(toggleWishlist(product));
                             }}

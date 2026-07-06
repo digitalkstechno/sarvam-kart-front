@@ -21,6 +21,7 @@ export default function AddToCartButton({ product, variantId, className = "", is
   const { items } = useSelector((state: RootState) => state.cart);
   const { token } = useSelector((state: RootState) => state.auth);
   const [addedAnimation, setAddedAnimation] = useState(false);
+  const [localInputValue, setLocalInputValue] = useState<string | null>(null);
   
   // Try to find if this product is already in the cart
   // Handle case where productId is populated (object) or just an ID (string)
@@ -41,7 +42,7 @@ export default function AddToCartButton({ product, variantId, className = "", is
     const payload = {
       productId: product._id || product.shopifyId, // Try Mongo ID first
       variantId: variantId || product.variants?.[0]?.shopifyVariantId || product.variants?.[0]?._id,
-      quantity: 50 // Minimum quantity is 50
+      quantity: 1 // Minimum quantity is 50 -> commented for now
     };
 
     if (!payload.productId) {
@@ -70,25 +71,53 @@ export default function AddToCartButton({ product, variantId, className = "", is
 
     if (!cartItem) return;
     
-    const newQty = cartItem.quantity + delta;
+    let baseQty = cartItem.quantity;
+    if (localInputValue !== null) {
+      const parsed = parseInt(localInputValue);
+      if (!isNaN(parsed)) {
+        baseQty = parsed;
+      }
+      setLocalInputValue(null);
+    }
+    
+    const newQty = baseQty + delta;
     if (newQty <= 0) {
       await dispatch(removeFromCartAsync(cartItem._id));
-    } else if (newQty < 50 && delta < 0) {
+    /* } else if (newQty < 50 && delta < 0) {
       // If they try to go below 50 using minus, just remove it or set to 0
-      await dispatch(removeFromCartAsync(cartItem._id));
+      await dispatch(removeFromCartAsync(cartItem._id)); */
     } else {
-      await dispatch(updateQuantityAsync({ cartItemId: cartItem._id, quantity: newQty < 50 ? 50 : newQty }));
+      // await dispatch(updateQuantityAsync({ cartItemId: cartItem._id, quantity: newQty < 50 ? 50 : newQty }));
+      await dispatch(updateQuantityAsync({ cartItemId: cartItem._id, quantity: newQty }));
     }
   };
 
-  const handleManualQuantityChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value);
-    if (!isNaN(val)) {
-      if (val === 0) {
-        await dispatch(removeFromCartAsync(cartItem._id));
-      } else {
-        await dispatch(updateQuantityAsync({ cartItemId: cartItem._id, quantity: val }));
+  const applyLocalQuantity = async () => {
+    if (localInputValue !== null) {
+      const val = parseInt(localInputValue);
+      if (!isNaN(val)) {
+        if (val === 0) {
+          await dispatch(removeFromCartAsync(cartItem._id));
+        } else if (val !== cartItem.quantity) {
+          await dispatch(updateQuantityAsync({ cartItemId: cartItem._id, quantity: val }));
+        }
       }
+      setLocalInputValue(null);
+    }
+  };
+
+  const handleManualQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalInputValue(e.target.value);
+  };
+
+  const handleInputBlur = () => {
+    applyLocalQuantity();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      applyLocalQuantity();
     }
   };
 
@@ -106,9 +135,11 @@ export default function AddToCartButton({ product, variantId, className = "", is
         </button>
         <input
           type="number"
-          min="50"
-          value={cartItem.quantity}
+          min="1"
+          value={localInputValue !== null ? localInputValue : cartItem.quantity}
           onChange={handleManualQuantityChange}
+          onBlur={handleInputBlur}
+          onKeyDown={handleKeyDown}
           className="flex-1 w-12 text-center font-bold text-sm text-slate-800 font-mono focus:outline-none focus:ring-1 focus:ring-[#00A759] bg-transparent"
         />
         <button
