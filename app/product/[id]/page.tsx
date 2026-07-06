@@ -439,7 +439,7 @@ export default function ProductDetailPage() {
                       </span>
                       <input
                         type="number"
-                        min="50"
+                        min="1"
                         value={cartItem.quantity}
                         onChange={async (e) => {
                           const val = parseInt(e.target.value);
